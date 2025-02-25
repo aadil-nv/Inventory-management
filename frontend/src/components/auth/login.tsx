@@ -1,6 +1,6 @@
 
 export  function login() {
   return (
-    <div>login page careteed</div>
+    <div className="text-3xl text-red-500">login page careteed</div>
   )
 }

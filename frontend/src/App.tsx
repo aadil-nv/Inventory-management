@@ -1,17 +1,15 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Login } from './components/auth/Login';
-import { Signup } from './components/auth/Signup';
-import {DashBoardLayout} from './components/dashboard/Main';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { PublicRoutes } from './routes/PublicRoute';
+import { UserRoutes } from './routes/UserRoutes';
 
 function App() {
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<DashBoardLayout />} />
-
+      <Route path='/*'  element={  <PublicRoutes />} />
+      <Route path="/user/*" element={ <UserRoutes /> } />
+      <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
      

@@ -7,6 +7,16 @@ export const MESSAGES = {
     UNAUTHORIZED: "Unauthorized access.",
     SERVER_ERROR: "Internal Server Error.",
     USER_ALREADY_EXISTS: "User already exists.",
+    CUSTOMER_ALREADY_EXISTS: "Customer already exists",
+    CUSTOMER_CREATED: "Customer created successfully.",
+    CUSTOMER_NOT_FOUND: "Customer not found.",
+    CUSTOMER_DELETED: "Customer deleted successfully.",
+    CUSTOMER_UPDATED: "Customer updated successfully.",
+    PRODUCT_CREATED: "Product created successfully.",
+    PRODUCT_ALREADY_EXISTS: "Product already exists.",
+    PRODUCT_NOT_FOUND: "Product not found.",
+    PRODUCT_DELETED: "Product deleted successfully.",
+    PRODUCT_UPDATED: "Product updated successfully."
   };
   
   

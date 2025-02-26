@@ -1,44 +1,70 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Typography } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Typography, message } from 'antd';
+import { UserOutlined, LockOutlined, MailOutlined, UserAddOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ClipLoader from "react-spinners/ClipLoader";
-import SignupImage from "../../assets/signup.avif"
+import SignupImage from "../../assets/signup.avif";
+import { login } from "../../redux/slices/userSlice";
+import { useDispatch } from "react-redux";
+import axios from 'axios';
+import { passwordValidator} from "../../utils/Validator"
+import { registerUser } from '../../api/authAPI';
 
 const { Title, Text } = Typography;
 
 interface SignupFormValues {
+  name: string;
   username: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
 
+
+
 export function Signup(): React.ReactElement {
   const [loading, setLoading] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   
-  const onFinish = (values: SignupFormValues): void => {
+  const onFinish = async (values: SignupFormValues): Promise<void> => {
     setLoading(true);
-    
-    setTimeout(() => {
-      console.log('Signup successful:', values);
+    setApiError(null);
+  
+    try {
+      await registerUser(values); // Call the API function
+  
+      dispatch(login({ userName: values.username }));
+      message.success('Account created successfully!');
+      navigate('/user/dashboard');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setApiError(error.response?.data?.message || 'An error occurred during signup');
+      } else {
+        setApiError('An unexpected error occurred');
+      }
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
+  
+
+ 
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gray-100">
       {/* Main Box containing both image and form */}
       <motion.div 
-        className="w-full max-w-4xl  bg-white rounded-lg shadow-lg overflow-hidden"
+        className="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <div className="flex flex-col md:flex-row">
           {/* Left side - Image */}
-          <div className="md:w-1/2  flex items-center justify-center p-8">
+          <div className="md:w-1/2 flex items-center justify-center p-8">
             <motion.img 
               src={SignupImage} 
               alt="Inventory Management" 
@@ -55,6 +81,12 @@ export function Signup(): React.ReactElement {
               <Title level={2} className="text-center mb-4">Inventory Management</Title>
               <Title level={4} className="text-center mb-6 text-gray-500">Create your account</Title>
               
+              {apiError && (
+                <div className="mb-4 p-2 text-red-500 bg-red-50 border border-red-200 rounded">
+                  {apiError}
+                </div>
+              )}
+              
               <Form
                 name="signup"
                 layout="vertical"
@@ -62,6 +94,16 @@ export function Signup(): React.ReactElement {
                 size="large"
                 className="space-y-4"
               >
+                <Form.Item
+                  name="name"
+                  rules={[{ required: true, message: 'Please input your full name!' }]}
+                >
+                  <Input 
+                    prefix={<UserAddOutlined className="text-gray-400" />} 
+                    placeholder="Full Name" 
+                  />
+                </Form.Item>
+
                 <Form.Item
                   name="username"
                   rules={[{ required: true, message: 'Please input your username!' }]}
@@ -89,7 +131,7 @@ export function Signup(): React.ReactElement {
                   name="password"
                   rules={[
                     { required: true, message: 'Please input your password!' },
-                    { min: 8, message: 'Password must be at least 8 characters!' }
+                    passwordValidator
                   ]}
                 >
                   <Input.Password

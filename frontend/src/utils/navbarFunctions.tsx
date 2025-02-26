@@ -19,8 +19,7 @@ export interface NavbarFunctionsProps {
 
 export const handleLogout = async({isUser,dispatch,navigate,}: NavbarFunctionsProps) => {
   if (isUser.isAuthenticated) {    
-
-    userInstance.post("/communication-service/api/chat/logout");
+    userInstance.post("api/auth/logout");
     dispatch(userLogout());
     navigate("/login");
   } 

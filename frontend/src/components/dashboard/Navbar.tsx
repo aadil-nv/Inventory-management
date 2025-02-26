@@ -3,17 +3,18 @@ import { useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { NavButton, toggleMenu } from "../../utils/navbarFunctions";
 import { useTheme } from "../../hooks/useTheme";
+import useAuth from "../../hooks/useAuth";
 
 export  function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
-  const [showNotifications, setShowNotifications] = useState<boolean>(false);
   
   const { isActiveMenu, themeMode } = useTheme();
+  const { user } = useAuth()
   const dispatch = useDispatch();
 
   const defaultProfileImage = "https://cdn.pixabay.com/photo/2018/08/28/12/41/avatar-3637425_1280.png";
-  const userName = "user";
+  const userName = user.userName
   const profileImage = defaultProfileImage;
 
   // Set theme-based colors
@@ -37,22 +38,7 @@ export  function Navbar() {
       />
       
       <div className="flex items-center space-x-4">
-        <div className="relative">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="flex items-center justify-center relative"
-            style={{
-              background: backgroundColor,
-              padding: "8px",
-              borderRadius: "12px",
-              color: textColor,
-            }}
-          >
-            🔔
-          </motion.button>
-        </div>
+
 
         <motion.div className="relative" whileHover={{ scale: 1.02 }}>
           <motion.button

@@ -9,7 +9,6 @@ export const DashBoardLayout = () => {
 
   return (
     <div className="flex z-1000">
-        <h1>lsdjhfklsadhfjkhsdjkfdjkshfk</h1>
       <div
         className={`fixed h-screen bg-gray-800 text-white z-30 transition-all duration-300 
         ${isActiveMenu ? 'w-64' : 'w-0'}`} 

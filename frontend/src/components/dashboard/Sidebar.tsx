@@ -1,54 +1,68 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { FiMenu, FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { useDispatch } from 'react-redux';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { FiMenu, FiChevronDown, FiChevronUp, FiLogOut } from "react-icons/fi";
+import { useDispatch, useSelector } from 'react-redux';
 import { setActiveMenu } from '../../redux/slices/themeSlice';
 import { userLinks } from '../../utils/sidebarLinks';
-import {useTheme} from '../../hooks/useTheme';
-
-
+import { useTheme } from '../../hooks/useTheme';
+import { handleLogout } from "../../utils/navbarFunctions";
+import { Modal } from 'antd';
+import { RootState } from '../../redux/store';
 
 export const Sidebar = () => {
   const { isActiveMenu, themeMode } = useTheme();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
+  const isUser = useSelector((state: RootState) => state.user);
+  
+  // Add state for modal visibility
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const links = userLinks
-
-  const companyLogo = "https://cdn.pixabay.com/photo/2012/04/23/15/57/copyright-38672_640.png"
-
+  const links = userLinks;
+  
   const toggleMenu = () => dispatch(setActiveMenu(!isActiveMenu));
   const toggleSubMenu = (title: string) => setActiveSubMenu(activeSubMenu === title ? null : title);
 
+  // Show modal
+  const showLogoutConfirm = () => {
+    setIsModalVisible(true);
+  };
+
+  // Handle OK button in modal
+  const handleOk = () => {
+    setIsModalVisible(false);
+    handleLogout({ isUser, dispatch, navigate });
+  };
+
+  // Handle Cancel button in modal
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
   return (
     <div>
-      {/* Toggle Button */}
       <button 
         onClick={toggleMenu} 
-        className="p-4 text-gray-800 md:hidden hover:opacity-80 transition-opacity" 
-        style={{ backgroundColor: themeMode === 'dark' ? '#333' : '#fff' }}
+        className="p-4 md:hidden hover:opacity-80 transition-opacity" 
+        style={{ backgroundColor: themeMode === 'dark' ? '#333' : '#fff', color: themeMode === 'dark' ? '#fff' : '#000' }}
       >
-        <FiMenu className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"  />
+        <FiMenu className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
       </button>
 
       {/* Sidebar */}
       <div className={`fixed top-0 left-0 h-full transition-all ${themeMode === 'dark' ? 'bg-gray-800' : 'bg-white'} duration-300 z-40 ${isActiveMenu ? 'w-64 shadow-lg' : 'w-0'} overflow-hidden`}>
         {isActiveMenu && (
           <div className="h-full flex flex-col">
-            {/* Logo Header */}
-            <div className="flex justify-between items-center p-4 ">
+            {/* Header */}
+            <div className="flex justify-center items-center p-4  border-gray-200 dark:border-gray-700">
               <NavLink
                 to={`/dashboard`}
-                className="flex items-center space-x-3 group hover:opacity-90 transition-opacity"
+                className="group hover:opacity-90 transition-opacity"
               >
-                <img
-                  src={companyLogo}
-                  alt="Company Logo"
-                  className="w-10 h-10 object-cover rounded-full shadow-md"
-                />
-                <span className={`font-bold text-lg truncate max-w-[180px] ${themeMode === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                  Inventory Management
-                </span>
+                <h1 className={`font-bold text-xl text-center ${themeMode === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                  [Inventory Management]
+                </h1>
               </NavLink>
             </div>
 
@@ -64,7 +78,7 @@ export const Sidebar = () => {
                       hover:shadow-lg hover:scale-[1.02] hover:brightness-110`
                     }
                     style={({ isActive }) => ({
-                      backgroundColor: isActive ? themeMode : 'transparent',
+                      backgroundColor: isActive ? '#106de6' : 'transparent', // Blue background for active
                       color: isActive ? 'white' : themeMode === 'dark' ? 'white' : 'black',
                     })}
                     onClick={() => item.hasSubMenu && toggleSubMenu(item.title)}
@@ -73,7 +87,7 @@ export const Sidebar = () => {
                     <span className="flex-grow">{item.title}</span>
                     {item.hasSubMenu && (
                       <span className="flex-shrink-0">
-                        {activeSubMenu === item.title ? <FiChevronUp className="w-5 h-5 sm:w-6 sm:h-6"  /> : <FiChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />}
+                        {activeSubMenu === item.title ? <FiChevronUp className="w-5 h-5 sm:w-6 sm:h-6" /> : <FiChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />}
                       </span>
                     )}
                   </NavLink>
@@ -91,7 +105,7 @@ export const Sidebar = () => {
                             hover:shadow-lg hover:scale-[1.02] hover:brightness-110`
                           }
                           style={({ isActive }) => ({
-                            backgroundColor: isActive ? themeMode : 'transparent',
+                            backgroundColor: isActive ? '#1e40af' : 'transparent', // Blue background for active
                             color: isActive ? 'white' : themeMode === 'dark' ? 'white' : 'black',
                           })}
                         >
@@ -104,9 +118,35 @@ export const Sidebar = () => {
                 </div>
               ))}
             </div>
+
+            {/* Logout Button */}
+            <div className="mt-auto p-4  border-gray-200 dark:border-gray-700">
+              <button
+                onClick={showLogoutConfirm}
+                className="w-full flex items-center gap-4 p-3 rounded-lg font-semibold transition-all duration-200
+                hover:shadow-lg hover:scale-[1.02] hover:brightness-110
+                text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <FiLogOut className="text-xl flex-shrink-0" />
+                <span className="flex-grow">Logout</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Custom Modal */}
+      <Modal
+        title="Logout Confirmation"
+        open={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        okText="Yes"
+        cancelText="No"
+        okButtonProps={{ style: { backgroundColor: '#1e40af', borderColor: '#1e40af' } }} // Blue OK button
+      >
+        <p>Are you sure you want to logout?</p>
+      </Modal>
 
       {/* Overlay */}
       {isActiveMenu && (
@@ -118,4 +158,3 @@ export const Sidebar = () => {
     </div>
   );
 };
-

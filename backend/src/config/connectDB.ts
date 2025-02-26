@@ -3,7 +3,7 @@ import 'colors';
 
 export let dbInstance: Mongoose;
 
-const connectDB = async (): Promise<void> => {
+export const connectDB = async (): Promise<void> => {
     try {
         if (process.env.MONGODB_URL) {
             dbInstance = await mongoose.connect(process.env.MONGODB_URL);
@@ -17,4 +17,3 @@ const connectDB = async (): Promise<void> => {
     }
 };
 
-export default connectDB;

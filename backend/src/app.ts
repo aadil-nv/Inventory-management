@@ -5,13 +5,13 @@ import cookieParser from "cookie-parser"
 
 dotenv.config();
 
-import errorHandler from "./middlewares/errorHandler";
-import authRoutes from "./routes/authRoutes";
-import userRoutes from "./routes/userRoutes";
-import customerRoutes from "./routes/customerRoutes";
-import productRoutes from "./routes/productRoutes";
-
-import connectDB from "./config/connectDB";
+import {errorHandler} from "./middlewares/errorHandler";
+import {authRouter} from "./routes/auth.routes";
+import {userRouter} from "./routes/user.routes";
+import {customerRouter} from "./routes/customer.routes";
+import {productRouter} from "./routes/product.routes";
+import {salesRouter} from "./routes/sales.routes";
+import {connectDB} from "./config/connectDB";
 
 connectDB();
 
@@ -28,14 +28,15 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser()); 
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/customer", customerRoutes);
-app.use("/api/product", productRoutes);
+app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
+app.use("/api/customer", customerRouter);
+app.use("/api/product", productRouter);
+app.use("/api/sale", salesRouter);
 
 
-// Global Error Handler
+
+
 app.use(errorHandler);
 
 export default app;

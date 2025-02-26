@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { Product } from "../models/productSchema";
+import { Product } from "../models/product.schema";
 import { MESSAGES } from "../utils/constants";
 import { AuthRequest } from "../utils/interface";
 import { HttpStatusCode } from "../utils/enums";

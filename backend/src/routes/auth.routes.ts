@@ -3,11 +3,10 @@ import { registerUser, loginUser,logoutUser,setNewAccessToken } from "../control
 import { registerValidation, loginValidation } from "../middlewares/authValidators";
 import { validateRequest } from "../middlewares/validateRequest";
 
-const authRouter = Router();
+export const authRouter = Router();
 
 authRouter.post("/register", registerValidation, validateRequest, registerUser);
 authRouter.post("/login", loginValidation, validateRequest, loginUser);
 authRouter.post("/logout", validateRequest, logoutUser);
 authRouter.post('/refresh-token', validateRequest, setNewAccessToken);
 
-export default authRouter;

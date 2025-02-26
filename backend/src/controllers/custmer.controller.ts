@@ -1,11 +1,10 @@
 import { Response, NextFunction } from "express";
-import { Customer } from "../models/customerSchema";
+import { Customer } from "../models/customer.schema";
 import { MESSAGES } from "../utils/constants";
 import { HttpStatusCode } from "../utils/enums";
 import { AuthRequest } from "../utils/interface";
 import { validationResult } from "express-validator";
 
-// Create a new customer
 export const addNewCustomer = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const errors = validationResult(req);
@@ -32,7 +31,6 @@ export const addNewCustomer = async (req: AuthRequest, res: Response, next: Next
   }
 };
 
-// Get all customers
 export const getAllCustomers = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const customers = await Customer.find();
@@ -42,7 +40,6 @@ export const getAllCustomers = async (req: AuthRequest, res: Response, next: Nex
   }
 };
 
-// Get customer by ID
 export const getCustomerById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
@@ -58,7 +55,6 @@ export const getCustomerById = async (req: AuthRequest, res: Response, next: Nex
   }
 };
 
-// Update customer details
 export const updateCustomer = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const errors = validationResult(req);
@@ -67,6 +63,10 @@ export const updateCustomer = async (req: AuthRequest, res: Response, next: Next
     }
 
     const { id } = req.params;
+    console.log(" req.params ",req.params);
+    
+    console.log(" req.body ",req.body);
+    
     const updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, { new: true });
 
     if (!updatedCustomer) {

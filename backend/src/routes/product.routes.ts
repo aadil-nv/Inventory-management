@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { addNewProduct, deleteProduct, getAllProducts, getProductById, updateProduct } from "../controllers/product.controller";
-import authMiddleware from "../middlewares/authMiddleware";
+import {authMiddleware} from "../middlewares/authMiddleware";
 import { productValidation } from "../middlewares/authValidators";
 
-const productRouter = Router();
+export const productRouter = Router();
 
 productRouter.post("/add-product", authMiddleware,productValidation, addNewProduct);
 productRouter.get("/list-products", authMiddleware, getAllProducts);
@@ -16,4 +16,3 @@ productRouter.delete("/delete-product/:id", authMiddleware, deleteProduct);
 
 
 
-export default productRouter;

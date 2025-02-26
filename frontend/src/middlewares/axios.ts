@@ -41,6 +41,8 @@ const handleSubscriptionError = async (error: AxiosError) => {
 userInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
+    console.log("Error:=======>", error);
+    
     const originalRequest = error.config as InternalAxiosRequestConfig;
     if (error.response?.status === HttpStatusCode.UNAUTHORIZED && !originalRequest._retry) {
       originalRequest._retry = true;

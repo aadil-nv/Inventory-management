@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import { MESSAGES } from "../utils/constants";
-import { User } from "../models/userScheema";
+import { User } from "../models/user.scheema";
 import { HttpStatusCode } from "../utils/enums";
 import { generateAccessToken, generateRefreshToken ,verifyRefreshToken } from "../utils/jwt";
 
@@ -82,15 +82,17 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
 }
 
 export const setNewAccessToken =async (req: Request, res: Response, next: NextFunction) => {
+  console.log("setNewAccessToken is calling ===============>" + req.cookies.refreshToken);
+  
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "Unauthorized" });
+      return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Unauthorized" });
     }
     
     const decoded = verifyRefreshToken(refreshToken);
     if (!decoded) {
-      return res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "Unauthorized" });
+      return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Unauthorized" });
     }
     const accessToken = generateAccessToken({ id: decoded.id, email: decoded.email });
     res.cookie("accessToken", accessToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", maxAge: 15 * 60 * 1000 });    

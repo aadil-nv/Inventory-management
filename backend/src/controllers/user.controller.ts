@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { User } from "../models/userScheema";
+import { User } from "../models/user.scheema";
 import { MESSAGES } from "../utils/constants";
 import { AuthRequest } from "../utils/interface"; 
 import { HttpStatusCode } from "../utils/enums";

@@ -16,7 +16,12 @@ export const MESSAGES = {
     PRODUCT_ALREADY_EXISTS: "Product already exists.",
     PRODUCT_NOT_FOUND: "Product not found.",
     PRODUCT_DELETED: "Product deleted successfully.",
-    PRODUCT_UPDATED: "Product updated successfully."
+    PRODUCT_UPDATED: "Product updated successfully.",
+    SALE_UPDATED: "Sale updated successfully.",
+    SALE_NOT_FOUND: "Sale not found.",
+    SALE_DELETED : "Sale deleted successfully.",
+    SALE_CREATED : "Sale created successfully.",
+    INSUFFICIENT_STOCK : "Insufficient stock available.",
   };
   
   

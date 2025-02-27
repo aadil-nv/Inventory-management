@@ -12,6 +12,7 @@ import {customerRouter} from "./routes/customer.routes";
 import {productRouter} from "./routes/product.routes";
 import {salesRouter} from "./routes/sales.routes";
 import {connectDB} from "./config/connectDB";
+import { dashboardRouter } from "./routes/dashboard.routes";
 
 connectDB();
 
@@ -33,6 +34,7 @@ app.use("/api/users", userRouter);
 app.use("/api/customer", customerRouter);
 app.use("/api/product", productRouter);
 app.use("/api/sale", salesRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 
 

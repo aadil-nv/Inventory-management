@@ -1,6 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICustomer extends Document {
+  userId: mongoose.Types.ObjectId; // Reference to the user
   name: string;
   email: string;
   mobileNumber: string;
@@ -15,6 +16,7 @@ export interface ICustomer extends Document {
 
 const CustomerSchema: Schema = new Schema(
   {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Linking customer to a user
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     mobileNumber: { type: String, required: true, unique: true },
@@ -29,4 +31,4 @@ const CustomerSchema: Schema = new Schema(
   { timestamps: true } // Adds createdAt & updatedAt fields
 );
 
-export const Customer = mongoose.model<ICustomer>('Customer', CustomerSchema);
+export const Customer = mongoose.model<ICustomer>("Customer", CustomerSchema);

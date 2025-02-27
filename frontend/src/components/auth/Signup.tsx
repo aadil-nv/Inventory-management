@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Typography, message } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, UserAddOutlined } from '@ant-design/icons';
+import { LockOutlined, MailOutlined, UserAddOutlined } from '@ant-design/icons';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import ClipLoader from "react-spinners/ClipLoader";
@@ -36,7 +36,7 @@ export function Signup(): React.ReactElement {
     try {
       await registerUser(values); // Call the API function
   
-      dispatch(login({ userName: values.username }));
+      dispatch(login({ userName: values.name }));
       message.success('Account created successfully!');
       navigate('/user/dashboard');
     } catch (error) {
@@ -101,16 +101,6 @@ export function Signup(): React.ReactElement {
                   <Input 
                     prefix={<UserAddOutlined className="text-gray-400" />} 
                     placeholder="Full Name" 
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="username"
-                  rules={[{ required: true, message: 'Please input your username!' }]}
-                >
-                  <Input 
-                    prefix={<UserOutlined className="text-gray-400" />} 
-                    placeholder="Username" 
                   />
                 </Form.Item>
 

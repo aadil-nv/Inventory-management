@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-interface IProduct extends Document {
+export interface IProduct extends Document {
+  userId: mongoose.Types.ObjectId; // Reference to the user
   productName: string;
   description: string;
   quantity: number;
@@ -9,6 +10,7 @@ interface IProduct extends Document {
 
 const ProductSchema = new Schema<IProduct>(
   {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Linking product to a user
     productName: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
     quantity: { type: Number, required: true, min: 0 },

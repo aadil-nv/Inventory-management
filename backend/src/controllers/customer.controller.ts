@@ -13,13 +13,15 @@ export const addNewCustomer = async (req: AuthRequest, res: Response, next: Next
     }
 
     const { name, email, mobileNumber, address } = req.body;
+    const userId = req.user?.id;
+    
 
     const existingCustomer = await Customer.findOne({ email });
     if (existingCustomer) {
       return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.CUSTOMER_ALREADY_EXISTS });
     }
 
-    const newCustomer = new Customer({ name, email, mobileNumber, address });
+    const newCustomer = new Customer({userId, name, email, mobileNumber, address });
     await newCustomer.save();
 
     return res.status(HttpStatusCode.CREATED).json({
@@ -33,12 +35,18 @@ export const addNewCustomer = async (req: AuthRequest, res: Response, next: Next
 
 export const getAllCustomers = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const customers = await Customer.find();
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "User not authenticated" });
+    }
+
+    const customers = await Customer.find({ userId }); // Filter by userId
     return res.status(HttpStatusCode.OK).json({ customers });
   } catch (error) {
     next(error);
   }
 };
+
 
 export const getCustomerById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -63,9 +71,6 @@ export const updateCustomer = async (req: AuthRequest, res: Response, next: Next
     }
 
     const { id } = req.params;
-    console.log(" req.params ",req.params);
-    
-    console.log(" req.body ",req.body);
     
     const updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, { new: true });
 

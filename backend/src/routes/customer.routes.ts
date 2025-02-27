@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addNewCustomer, deleteCustomer, getAllCustomers, getCustomerById, updateCustomer } from "../controllers/custmer.controller";
+import { addNewCustomer, deleteCustomer, getAllCustomers, getCustomerById, updateCustomer } from "../controllers/customer.controller";
 import {authMiddleware} from "../middlewares/authMiddleware";
 import { customerValidation} from "../middlewares/authValidators"
 

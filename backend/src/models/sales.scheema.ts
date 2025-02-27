@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISale extends Document {
+  userId: mongoose.Types.ObjectId; // Reference to the user who made the sale
   products: {
     productId: mongoose.Types.ObjectId;
     quantity: number;
@@ -13,6 +14,7 @@ export interface ISale extends Document {
 
 const SaleSchema: Schema = new Schema(
   {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Tracks the seller
     products: [
       {
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },

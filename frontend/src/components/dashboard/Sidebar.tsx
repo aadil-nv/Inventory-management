@@ -61,7 +61,7 @@ export const Sidebar = () => {
                 className="group hover:opacity-90 transition-opacity"
               >
                 <h1 className={`font-bold text-xl text-center ${themeMode === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                  [Inventory Management]
+                  Inventory Management
                 </h1>
               </NavLink>
             </div>

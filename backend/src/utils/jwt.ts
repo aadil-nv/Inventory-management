@@ -9,7 +9,7 @@ export const generateAccessToken = (data: object): string => {
     return jwt.sign(
         data, 
         ACCESS_TOKEN_SECRET as string,
-        { expiresIn: '1m' }
+        { expiresIn: '15m' }
     );
 };
 
@@ -17,7 +17,7 @@ export const generateRefreshToken = (data: object): string => {
     return jwt.sign(
         data, 
         REFRESH_TOKEN_SECRET as string,
-        { expiresIn: '3m' }
+        { expiresIn: '1d' }
     );
 };
 

@@ -12,8 +12,6 @@ export const PublicRoutes = () => {
     { path: "*", element: <Page404 /> },
 
 
-
-
   ];
 
   return (

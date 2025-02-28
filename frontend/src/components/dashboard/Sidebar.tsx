@@ -15,10 +15,7 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const isUser = useSelector((state: RootState) => state.user);
-  
-  // Add state for modal visibility
   const [isModalVisible, setIsModalVisible] = useState(false);
-
   const links = userLinks;
   
   const toggleMenu = () => dispatch(setActiveMenu(!isActiveMenu));

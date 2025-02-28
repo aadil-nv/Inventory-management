@@ -9,11 +9,8 @@ export const PublicRoutes = () => {
   const routes = [
     { path: "/", element: <Login /> },
     { path: "/signup", element: <Signup /> },
-    { path: "*", element: <Page404 /> },
-
-
+    { path: "*", element: <Page404 /> }
   ];
-
   return (
     <Routes>
       {routes.map(({ path, element }) => (

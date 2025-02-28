@@ -1,22 +1,10 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "lib": ["DOM","DOM.Iterable","ESNext"],
-    "types": ["react","react-dom"]
-  }
+      "@components/*": ["src/components/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

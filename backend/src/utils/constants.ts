@@ -22,6 +22,7 @@ export const MESSAGES = {
     SALE_DELETED : "Sale deleted successfully.",
     SALE_CREATED : "Sale created successfully.",
     INSUFFICIENT_STOCK : "Insufficient stock available.",
+    MOBILE_NUMBER_ALREADY_EXISTS : "Mobile number already exists."
   };
   
   

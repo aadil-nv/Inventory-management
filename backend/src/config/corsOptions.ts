@@ -1,0 +1,12 @@
+import { CorsOptions } from "cors";
+
+console.log(process.env.CLIENT_URL);
+
+const corsOptions: CorsOptions = {
+  origin: process.env.CLIENT_URL, // Default to localhost if not set
+  methods: "GET,POST,PUT,DELETE,PATCH",
+  allowedHeaders: "Content-Type,Authorization",
+  credentials: true,
+};
+
+export default corsOptions;

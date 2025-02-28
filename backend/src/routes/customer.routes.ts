@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addNewCustomer, deleteCustomer, getAllCustomers, getCustomerById, updateCustomer } from "../controllers/customer.controller";
+import { addNewCustomer, deleteCustomer, getAllCustomers, getCustomerById, updateCustomer ,sendCustomerReport } from "../controllers/customer.controller";
 import {authMiddleware} from "../middlewares/authMiddleware";
 import { customerValidation} from "../middlewares/authValidators"
 
@@ -10,4 +10,5 @@ customerRouter.get("/list-customers", authMiddleware, getAllCustomers);
 customerRouter.get("/customer-details/:id", authMiddleware, getCustomerById);
 customerRouter.put("/update-customer/:id", authMiddleware,customerValidation, updateCustomer);
 customerRouter.delete("/delete-customer/:id", deleteCustomer);
+customerRouter.post('/send-customer-details', authMiddleware, sendCustomerReport);
 

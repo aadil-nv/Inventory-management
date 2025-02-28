@@ -19,7 +19,7 @@ const CustomerSchema: Schema = new Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Linking customer to a user
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true },
-    mobileNumber: { type: String, required: true, unique: true },
+    mobileNumber: { type: String, required: true },
     address: {
       street: { type: String, required: true },
       city: { type: String, required: true },

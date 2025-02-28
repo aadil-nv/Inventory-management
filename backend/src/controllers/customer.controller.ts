@@ -4,6 +4,9 @@ import { MESSAGES } from "../utils/constants";
 import { HttpStatusCode } from "../utils/enums";
 import { AuthRequest } from "../utils/interface";
 import { validationResult } from "express-validator";
+import { transporter } from "../config/nodeMailer";
+import { User } from "../models/user.scheema";
+import { generateCustomerReport } from "../utils/generateCustomerReport";
 
 export const addNewCustomer = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -17,9 +20,14 @@ export const addNewCustomer = async (req: AuthRequest, res: Response, next: Next
     
 
     const existingCustomer = await Customer.findOne({ email });
+    const existingMobileNumber = await Customer.findOne({ mobileNumber });
     if (existingCustomer) {
       return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.CUSTOMER_ALREADY_EXISTS });
     }
+    if (existingMobileNumber) {
+      return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.MOBILE_NUMBER_ALREADY_EXISTS });
+    }
+    
 
     const newCustomer = new Customer({userId, name, email, mobileNumber, address });
     await newCustomer.save();
@@ -98,6 +106,53 @@ export const deleteCustomer = async (req: AuthRequest, res: Response, next: Next
 
     return res.status(HttpStatusCode.OK).json({ message: MESSAGES.CUSTOMER_DELETED });
   } catch (error) {
+    next(error);
+  }
+};
+
+
+export const sendCustomerReport = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  console.log("sendCustomerReport is calling ===============");
+  
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "User not authenticated" });
+    }
+
+    const { email, subject, message } = req.body;
+    if (!email || !subject || !message) {
+      return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Email, subject, and message are required" });
+    }
+
+    const customers = await Customer.find({ userId });
+    if (!customers.length) {
+      return res.status(HttpStatusCode.NOT_FOUND).json({ message: "No customers found for this user" });
+    }
+
+    const userData = await User.findById(userId);
+    if (!userData) {
+      return res.status(HttpStatusCode.NOT_FOUND).json({ message: "User not found" });
+    }
+
+    const productReport = generateCustomerReport(customers);
+
+    const mailOptions = {
+      from: userData.email,
+      to: email,
+      subject,
+      text: message,
+      html: productReport,
+    };
+    console.log("MailOptions",mailOptions);
+    
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(HttpStatusCode.OK).json({ message: "Product report sent successfully" });
+
+  } catch (error) {
+    console.error("Error sending product report:", error);
     next(error);
   }
 };

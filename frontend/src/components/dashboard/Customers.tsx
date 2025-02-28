@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Table, Button, Input, Modal, Form, Space, Popconfirm, message, Pagination,
-  Typography, Row, Col, Card, Spin, Divider, Select
+  Typography, Row, Col, Card, Spin, Divider, Select, Dropdown
 } from 'antd';
-import { 
-  PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, 
-  ReloadOutlined, UserOutlined, MailOutlined, PhoneOutlined, HomeOutlined
+import {
+  PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined,
+  ReloadOutlined, UserOutlined, MailOutlined, PhoneOutlined, HomeOutlined,
+  DownloadOutlined, FileExcelOutlined, FilePdfOutlined, PrinterOutlined, SendOutlined
 } from '@ant-design/icons';
 import { motion, AnimatePresence } from 'framer-motion';
-import {userInstance} from '../../middlewares/axios';
+import { userInstance } from '../../middlewares/axios';
+import { exportToExcel, exportToPdf, printData } from '../../utils/CustomerFunctions';
+import { EmailExportModal } from '../dashboard/Email';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -40,6 +43,12 @@ interface CustomerFormValues {
   country: string;
 }
 
+interface EmailFormValues {
+  recipient: string;
+  subject: string;
+  message: string;
+}
+
 export function Customers(): React.ReactElement {
   // State management
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -51,7 +60,10 @@ export function Customers(): React.ReactElement {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [searchText, setSearchText] = useState<string>('');
+  const [emailModalVisible, setEmailModalVisible] = useState<boolean>(false);
+  const [emailSending, setEmailSending] = useState<boolean>(false);
   const [form] = Form.useForm();
+  const [emailForm] = Form.useForm();
 
   // Fetch all customers
   const fetchCustomers = async () => {
@@ -67,19 +79,16 @@ export function Customers(): React.ReactElement {
     }
   };
 
-  // Initial data load
   useEffect(() => {
     fetchCustomers();
   }, []);
 
-  // Filter and paginate data client-side
   useEffect(() => {
-    // Filter based on search text
     let filteredData = [...allCustomers];
-    
+
     if (searchText) {
       const lowerCaseSearch = searchText.toLowerCase();
-      filteredData = filteredData.filter(customer => 
+      filteredData = filteredData.filter(customer =>
         customer.name.toLowerCase().includes(lowerCaseSearch) ||
         customer.email.toLowerCase().includes(lowerCaseSearch) ||
         customer.mobileNumber.toLowerCase().includes(lowerCaseSearch) ||
@@ -87,11 +96,11 @@ export function Customers(): React.ReactElement {
         customer.address.country.toLowerCase().includes(lowerCaseSearch)
       );
     }
-    
+
     // Calculate pagination
     const startIndex = (currentPage - 1) * pageSize;
     const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
-    
+
     setCustomers(paginatedData);
   }, [allCustomers, searchText, currentPage, pageSize]);
 
@@ -111,13 +120,14 @@ export function Customers(): React.ReactElement {
           country: values.country
         }
       };
-      
+
       const response = await userInstance.post('api/customer/add-customer', customerData);
-      message.success('Customer added successfully');
-      
-      // Update local state with the new customer
+      if (response.status === 201) {
+        message.success('Customer added successfully');
+      }
+
       setAllCustomers([...allCustomers, response.data.customer]);
-      
+
       form.resetFields();
       setModalVisible(false);
     } catch (error) {
@@ -131,7 +141,7 @@ export function Customers(): React.ReactElement {
   // Update customer
   const updateCustomer = async (values: CustomerFormValues) => {
     if (!editingCustomer) return;
-    
+
     setLoading(true);
     try {
       const customerData = {
@@ -146,15 +156,15 @@ export function Customers(): React.ReactElement {
           country: values.country
         }
       };
-      
+
       const response = await userInstance.put(`api/customer/update-customer/${editingCustomer._id}`, customerData);
       message.success('Customer updated successfully');
-      
+
       // Update local state with the updated customer
-      setAllCustomers(allCustomers.map(customer => 
+      setAllCustomers(allCustomers.map(customer =>
         customer._id === editingCustomer._id ? response.data.customer : customer
       ));
-      
+
       form.resetFields();
       setModalVisible(false);
       setEditingCustomer(null);
@@ -172,10 +182,10 @@ export function Customers(): React.ReactElement {
     try {
       await userInstance.delete(`api/customer/delete-customer/${id}`);
       message.success('Customer deleted successfully');
-      
+
       // Update local state by removing the deleted customer
       setAllCustomers(allCustomers.filter(customer => customer._id !== id));
-      
+
       // If deleting the last item on a page, go back to previous page
       const remainingFilteredItems = allCustomers
         .filter(customer => customer._id !== id)
@@ -183,12 +193,12 @@ export function Customers(): React.ReactElement {
           if (!searchText) return true;
           const lowerCaseSearch = searchText.toLowerCase();
           return customer.name.toLowerCase().includes(lowerCaseSearch) ||
-                 customer.email.toLowerCase().includes(lowerCaseSearch) ||
-                 customer.mobileNumber.toLowerCase().includes(lowerCaseSearch) ||
-                 customer.address.city.toLowerCase().includes(lowerCaseSearch) ||
-                 customer.address.country.toLowerCase().includes(lowerCaseSearch);
+            customer.email.toLowerCase().includes(lowerCaseSearch) ||
+            customer.mobileNumber.toLowerCase().includes(lowerCaseSearch) ||
+            customer.address.city.toLowerCase().includes(lowerCaseSearch) ||
+            customer.address.country.toLowerCase().includes(lowerCaseSearch);
         });
-      
+
       const totalPages = Math.ceil(remainingFilteredItems.length / pageSize);
       if (currentPage > totalPages && currentPage > 1) {
         setCurrentPage(totalPages || 1);
@@ -248,9 +258,9 @@ export function Customers(): React.ReactElement {
   // Get filtered data count for pagination
   const getFilteredTotal = () => {
     if (!searchText) return allCustomers.length;
-    
+
     const lowerCaseSearch = searchText.toLowerCase();
-    return allCustomers.filter(customer => 
+    return allCustomers.filter(customer =>
       customer.name.toLowerCase().includes(lowerCaseSearch) ||
       customer.email.toLowerCase().includes(lowerCaseSearch) ||
       customer.mobileNumber.toLowerCase().includes(lowerCaseSearch) ||
@@ -258,6 +268,121 @@ export function Customers(): React.ReactElement {
       customer.address.country.toLowerCase().includes(lowerCaseSearch)
     ).length;
   };
+
+  // Export functions
+  const handleExportToExcel = () => {
+    // Use either filtered data or all data based on search
+    const dataToExport = searchText ? customers : allCustomers;
+
+    const formattedData = dataToExport.map(customer => ({
+      'Name': customer.name,
+      'Email': customer.email,
+      'Mobile Number': customer.mobileNumber,
+      'Street': customer.address.street,
+      'City': customer.address.city,
+      'State': customer.address.state,
+      'Zip Code': customer.address.zipCode,
+      'Country': customer.address.country
+    }));
+
+    exportToExcel(formattedData, 'Customers_Report');
+    message.success('Customer data exported to Excel successfully');
+  };
+
+  const handleExportToPdf = () => {
+    // Use either filtered data or all data based on search
+    const dataToExport = searchText ? customers : allCustomers;
+
+    const formattedData = dataToExport.map(customer => ({
+      'Name': customer.name,
+      'Email': customer.email,
+      'Mobile': customer.mobileNumber,
+      'Address': `${customer.address.city}, ${customer.address.country}`
+    }));
+
+    exportToPdf(formattedData, 'Customers_Report', 'Customer List');
+    message.success('Customer data exported to PDF successfully');
+  };
+
+  const handlePrint = () => {
+    // Use either filtered data or all data based on search
+    const dataToExport = searchText ? customers : allCustomers;
+
+    const formattedData = dataToExport.map(customer => ({
+      'Name': customer.name,
+      'Email': customer.email,
+      'Mobile': customer.mobileNumber,
+      'Address': `${customer.address.city}, ${customer.address.country}`
+    }));
+
+    printData(formattedData, 'Customer List');
+    message.success('Print initiated successfully');
+  };
+
+  const handleEmailModalOpen = () => {
+    setEmailModalVisible(true);
+    emailForm.resetFields();
+  };
+
+  const handleSendEmail = async (values: EmailFormValues) => {
+    setEmailSending(true);
+    try {
+      // Use either filtered data or all data based on search
+      const dataToSend = searchText ? customers : allCustomers;
+
+      // Format the data to send
+      const formattedData = dataToSend.map(customer => ({
+        name: customer.name,
+        email: customer.email,
+        mobileNumber: customer.mobileNumber,
+        address: `${customer.address.city}, ${customer.address.country}`
+      }));
+
+      await userInstance.post('api/customer/send-customer-details', {
+        email: values.recipient,
+        subject: values.subject,
+        message: values.message,
+        customers: formattedData
+      });
+
+      message.success('Customer report sent via email successfully');
+      setEmailModalVisible(false);
+      emailForm.resetFields();
+    } catch (error) {
+      message.error('Failed to send email');
+      console.error('Error sending email:', error);
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
+  // Export dropdown menu items
+  const exportMenuItems = [
+    {
+      key: 'excel',
+      icon: <FileExcelOutlined />,
+      label: 'Export to Excel',
+      onClick: handleExportToExcel
+    },
+    {
+      key: 'pdf',
+      icon: <FilePdfOutlined />,
+      label: 'Export to PDF',
+      onClick: handleExportToPdf
+    },
+    {
+      key: 'print',
+      icon: <PrinterOutlined />,
+      label: 'Print',
+      onClick: handlePrint
+    },
+    {
+      key: 'email',
+      icon: <SendOutlined />,
+      label: 'Send via Email',
+      onClick: handleEmailModalOpen
+    }
+  ];
 
   // Table columns
   const columns = [
@@ -297,7 +422,7 @@ export function Customers(): React.ReactElement {
     {
       title: 'Location',
       key: 'location',
-      render: (text: string, record: Customer) => (
+      render: (_: string, record: Customer) => (
         <span>
           <HomeOutlined className="mr-2 text-orange-500" />
           {record.address.city}, {record.address.country}
@@ -307,12 +432,12 @@ export function Customers(): React.ReactElement {
     {
       title: 'Actions',
       key: 'actions',
-      render: (text: string, record: Customer) => (
+      render: (_: string, record: Customer) => (
         <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EditOutlined />} 
-            size="small" 
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            size="small"
             onClick={() => showModal(record)}
           >
             Edit
@@ -324,9 +449,9 @@ export function Customers(): React.ReactElement {
             okText="Yes"
             cancelText="No"
           >
-            <Button 
-              danger 
-              icon={<DeleteOutlined />} 
+            <Button
+              danger
+              icon={<DeleteOutlined />}
               size="small"
             >
               Delete
@@ -350,14 +475,21 @@ export function Customers(): React.ReactElement {
       <Card className="w-full shadow-md">
         <div className="flex justify-between items-center mb-6">
           <Title level={2} className="m-0">Customers</Title>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
-            onClick={() => showModal()}
-            size="large"
-          >
-            Add Customer
-          </Button>
+          <Space>
+            <Dropdown menu={{ items: exportMenuItems }}>
+              <Button icon={<DownloadOutlined />} size="large">
+                Export <span className="ml-1">▼</span>
+              </Button>
+            </Dropdown>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => showModal()}
+              size="large"
+            >
+              Add Customer
+            </Button>
+          </Space>
         </div>
 
         <Divider />
@@ -376,8 +508,8 @@ export function Customers(): React.ReactElement {
               />
             </Col>
             <Col>
-              <Button 
-                icon={<ReloadOutlined />} 
+              <Button
+                icon={<ReloadOutlined />}
                 onClick={resetSearch}
                 size="large"
               >
@@ -402,22 +534,22 @@ export function Customers(): React.ReactElement {
               </div>
             ) : (
               <>
-                <Table 
-                  dataSource={customers} 
+                <Table
+                  dataSource={customers}
                   columns={columns}
                   rowKey="_id"
                   pagination={false}
                   className="mb-4"
                   locale={{ emptyText: "No customers found" }}
                 />
-                
+
                 <div className="flex justify-end mt-4">
                   <Pagination
                     current={currentPage}
                     pageSize={pageSize}
                     total={filteredTotal}
                     onChange={(page) => setCurrentPage(page)}
-                    onShowSizeChange={(current, size) => {
+                    onShowSizeChange={(_, size) => { // Removed 'current' since it's not used
                       setCurrentPage(1);
                       setPageSize(size);
                     }}
@@ -426,6 +558,7 @@ export function Customers(): React.ReactElement {
                     showTotal={(total) => `Total ${total} customers`}
                   />
                 </div>
+
               </>
             )}
           </motion.div>
@@ -572,6 +705,15 @@ export function Customers(): React.ReactElement {
           </Form>
         </motion.div>
       </Modal>
+
+      {/* Email Export Modal */}
+      <EmailExportModal
+        visible={emailModalVisible}
+        onCancel={() => setEmailModalVisible(false)}
+        form={emailForm}
+        onFinish={handleSendEmail}
+        loading={emailSending}
+      />
     </motion.div>
   );
 }

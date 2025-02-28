@@ -21,18 +21,19 @@ interface MonthlySales {
   totalOrders: number;
 }
 
-interface TopSellingProduct {
+interface TopProduct {
   _id: string;
-  totalSold: number;
-  productId: string;
   productName: string;
+  description: string;
+  quantity: number;
+  price: number;
 }
 
-interface BestBuyer {
+interface TopCustomer {
   _id: string;
-  totalSpent: number;
-  customerId: string;
-  customerName: string;
+  name: string;
+  email: string;
+  mobileNumber: string;
 }
 
 interface DashboardData {
@@ -42,8 +43,8 @@ interface DashboardData {
   totalRevenue: number;
   averageOrderValue: number;
   monthlySales: MonthlySales[];
-  topSellingProducts: TopSellingProduct[];
-  bestBuyers: BestBuyer[];
+  topProducts: TopProduct[];
+  topCustomers: TopCustomer[];
 }
 
 interface ApiResponse {
@@ -122,7 +123,14 @@ export function Dashboard() {
     }
   };
 
-  // Table columns for top selling products
+  // Chart animations
+  const chartAnimations = {
+    animationBegin: 0,
+    animationDuration: 1500,
+    animationEasing: 'ease-in-out'
+  };
+
+  // Table columns for top products
   const productColumns = [
     {
       title: 'Product Name',
@@ -130,27 +138,36 @@ export function Dashboard() {
       key: 'productName',
     },
     {
-      title: 'Units Sold',
-      dataIndex: 'totalSold',
-      key: 'totalSold',
-      sorter: (a: TopSellingProduct, b: TopSellingProduct) => a.totalSold - b.totalSold,
+      title: 'Price',
+      dataIndex: 'price',
+      key: 'price',
+      render: (value: number) => `$${value.toFixed(2)}`,
+      sorter: (a: TopProduct, b: TopProduct) => a.price - b.price,
     },
+    {
+      title: 'Quantity',
+      dataIndex: 'quantity',
+      key: 'quantity',
+    }
   ];
 
-  // Table columns for best buyers
-  const buyerColumns = [
+  // Table columns for top customers
+  const customerColumns = [
     {
       title: 'Customer Name',
-      dataIndex: 'customerName',
-      key: 'customerName',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
-      title: 'Total Spent',
-      dataIndex: 'totalSpent',
-      key: 'totalSpent',
-      render: (value: number) => `$${value.toFixed(2)}`,
-      sorter: (a: BestBuyer, b: BestBuyer) => a.totalSpent - b.totalSpent,
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
     },
+    {
+      title: 'Mobile',
+      dataIndex: 'mobileNumber',
+      key: 'mobileNumber',
+    }
   ];
 
   if (loading) {
@@ -291,15 +308,22 @@ export function Dashboard() {
             </Col>
           </Row>
 
-          {/* Monthly Sales Chart - Now using LineChart with all months */}
-          <motion.div variants={itemVariants}>
+          {/* Monthly Sales Chart - Now with animations */}
+          <motion.div 
+            variants={itemVariants}
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
+          >
             <Card
               title="Monthly Performance"
               bordered={false}
               style={{ marginBottom: '24px' }}
             >
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={salesChartData}>
+                <LineChart 
+                  data={salesChartData}
+                  {...chartAnimations}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis yAxisId="left" orientation="left" stroke="#1890ff" />
@@ -312,14 +336,25 @@ export function Dashboard() {
                     dataKey="sales" 
                     stroke="#1890ff" 
                     activeDot={{ r: 8 }} 
-                    name="Sales ($)" 
+                    name="Sales ($)"
+                    strokeWidth={2}
+                    dot={{ strokeWidth: 2 }}
+                    isAnimationActive={true}
+                    animationDuration={1500}
+                    animationEasing="ease-in-out"
                   />
                   <Line 
                     yAxisId="right"
                     type="monotone" 
                     dataKey="orders" 
                     stroke="#ff7a45" 
-                    name="Orders" 
+                    name="Orders"
+                    strokeWidth={2}
+                    dot={{ strokeWidth: 2 }}
+                    isAnimationActive={true}
+                    animationDuration={1500}
+                    animationEasing="ease-in-out"
+                    animationBegin={300}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -329,10 +364,14 @@ export function Dashboard() {
           {/* Data Tables */}
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
-              <motion.div variants={itemVariants}>
-                <Card title="Top Selling Products" bordered={false}>
+              <motion.div 
+                variants={itemVariants}
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Card title="Top Products" bordered={false}>
                   <Table
-                    dataSource={dashboardData.topSellingProducts}
+                    dataSource={dashboardData.topProducts}
                     columns={productColumns}
                     rowKey="_id"
                     pagination={false}
@@ -341,11 +380,15 @@ export function Dashboard() {
               </motion.div>
             </Col>
             <Col xs={24} md={12}>
-              <motion.div variants={itemVariants}>
-                <Card title="Best Customers" bordered={false}>
+              <motion.div 
+                variants={itemVariants}
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Card title="Top Customers" bordered={false}>
                   <Table
-                    dataSource={dashboardData.bestBuyers}
-                    columns={buyerColumns}
+                    dataSource={dashboardData.topCustomers}
+                    columns={customerColumns}
                     rowKey="_id"
                     pagination={false}
                   />

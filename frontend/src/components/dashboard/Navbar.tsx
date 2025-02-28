@@ -7,7 +7,6 @@ import useAuth from "../../hooks/useAuth";
 
 export  function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
   
   const { isActiveMenu, themeMode } = useTheme();
   const { user } = useAuth()
@@ -18,7 +17,7 @@ export  function Navbar() {
   const profileImage = defaultProfileImage;
 
   // Set theme-based colors
-  const backgroundColor = themeMode === "dark" ? "#333" : "#fff";
+  const backgroundColor = themeMode === "dark" ? "black" : "#fff";
   const textColor = themeMode === "dark" ? "#fff" : "#333";
 
   return (
@@ -34,7 +33,7 @@ export  function Navbar() {
       <NavButton
         customFunc={() => toggleMenu(dispatch, isActiveMenu)}
         icon={<span>☰</span>}
-        themeColor={backgroundColor}
+        themeColor="blue"
       />
       
       <div className="flex items-center space-x-4">
@@ -62,12 +61,6 @@ export  function Navbar() {
             <span className="hidden sm:inline text-sm font-medium" style={{ color: textColor }}>
               {userName}
             </span>
-            <motion.div
-              animate={{ rotate: showProfileMenu ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              ▼
-            </motion.div>
           </motion.button>
 
           <AnimatePresence>
@@ -86,29 +79,7 @@ export  function Navbar() {
           </AnimatePresence>
         </motion.div>
 
-        <AnimatePresence>
-          {showLogoutConfirm && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed left-0 top-0 w-screen h-screen flex items-center justify-center z-50"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-              onClick={() => setShowLogoutConfirm(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-lg p-4 max-w-sm w-full"
-                style={{ backgroundColor }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Logout Confirmation */}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
       </div>
     </motion.div>
   );

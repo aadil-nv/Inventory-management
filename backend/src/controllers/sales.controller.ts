@@ -7,7 +7,7 @@ import { AuthRequest } from "../utils/interface";
 import { validationResult } from "express-validator";
 import { User } from "../models/user.scheema";
 import { transporter } from "../config/nodeMailer";
-import { generateSalesReport } from "../utils/generateSalesReport";
+import { generateSalesReport,MongoosePopulatedSale } from "../utils/generateSalesReport";
 
 export const addNewSale = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -186,8 +186,11 @@ export const sendSalesReport = async (req: AuthRequest, res: Response, next: Nex
       return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Email, subject, and message are required" });
     }
 
-    const sales = await Sale.find({ userId }).populate("products.productId customerId")
-      .sort({ date: -1 });
+    // Cast the result to the correct type
+    const sales = await Sale.find({ userId })
+      .populate("products.productId customerId")
+      .sort({ date: -1 }) as unknown as MongoosePopulatedSale[];
+      
     if (!sales.length) {
       return res.status(HttpStatusCode.NOT_FOUND).json({ message: "No sales found for this user" });
     }

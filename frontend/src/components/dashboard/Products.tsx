@@ -39,6 +39,7 @@ export function Products() {
   const [isEmailModalVisible, setIsEmailModalVisible] = useState<boolean>(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [searchText, setSearchText] = useState<string>('');
+  const [searchBy, setSearchBy] = useState<'name' | 'description' | 'both'>('both'); // New state for search type
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -56,7 +57,7 @@ export function Products() {
   // Handle pagination and filtering when products or search changes
   useEffect(() => {
     handleClientSidePagination();
-  }, [products, searchText, pagination.current, pagination.pageSize]);
+  }, [products, searchText, searchBy, pagination.current, pagination.pageSize]);
 
   // Function to fetch all products at once
   const fetchProducts = async (): Promise<void> => {
@@ -79,10 +80,15 @@ export function Products() {
 
   // Function to handle client-side pagination and filtering
   const handleClientSidePagination = (): void => {
-    // Filter by product name
-    const filteredProducts = products.filter(product => 
-      product.productName.toLowerCase().includes(searchText.toLowerCase())
-    );
+    // Filter by product name and/or description based on searchBy state
+    const filteredProducts = products.filter(product => {
+      const nameMatch = product.productName.toLowerCase().includes(searchText.toLowerCase());
+      const descriptionMatch = product.description.toLowerCase().includes(searchText.toLowerCase());
+      
+      if (searchBy === 'name') return nameMatch;
+      if (searchBy === 'description') return descriptionMatch;
+      return nameMatch || descriptionMatch; // 'both' option
+    });
     
     // Calculate pagination
     const startIndex = (pagination.current - 1) * pagination.pageSize;
@@ -161,6 +167,15 @@ export function Products() {
     }));
   };
 
+  // Function to handle search type change
+  const handleSearchByChange = (value: 'name' | 'description' | 'both'): void => {
+    setSearchBy(value);
+    setPagination(prev => ({
+      ...prev,
+      current: 1 // Reset to first page when changing search type
+    }));
+  };
+
   // Function to handle pagination change
   const handlePaginationChange = (page: number, pageSize?: number): void => {
     setPagination({
@@ -217,6 +232,33 @@ export function Products() {
       setLoading(false);
     }
   };
+
+  // Search menu items
+  const searchMenu = (
+    <Menu>
+      <Menu.Item 
+        key="name" 
+        onClick={() => handleSearchByChange('name')}
+        className={searchBy === 'name' ? 'ant-menu-item-selected' : ''}
+      >
+        Search by Name
+      </Menu.Item>
+      <Menu.Item 
+        key="description" 
+        onClick={() => handleSearchByChange('description')}
+        className={searchBy === 'description' ? 'ant-menu-item-selected' : ''}
+      >
+        Search by Description
+      </Menu.Item>
+      <Menu.Item 
+        key="both" 
+        onClick={() => handleSearchByChange('both')}
+        className={searchBy === 'both' ? 'ant-menu-item-selected' : ''}
+      >
+        Search by Both
+      </Menu.Item>
+    </Menu>
+  );
 
   // Table columns definition
   const columns = [
@@ -320,15 +362,22 @@ export function Products() {
         </div>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 flex space-x-2">
         <Input
-          placeholder="Search by product name"
+          placeholder={`Search by ${searchBy === 'name' ? 'product name' : searchBy === 'description' ? 'description' : 'name or description'}`}
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={(e) => handleSearch(e.target.value)}
           allowClear
           className="w-64"
         />
+        <Dropdown overlay={searchMenu} placement="bottomLeft">
+          <Button>
+            {searchBy === 'name' ? 'Search by Name' : 
+             searchBy === 'description' ? 'Search by Description' : 
+             'Search by Both'} ▼
+          </Button>
+        </Dropdown>
       </div>
 
       <AnimatePresence>

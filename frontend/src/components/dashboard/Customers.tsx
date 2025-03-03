@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { userInstance } from '../../middlewares/axios';
 import { exportToExcel, exportToPdf, printData } from '../../utils/CustomerFunctions';
 import { EmailExportModal } from '../dashboard/Email';
+import { addCustomerApi, deleteCustomerApi, fetchCustomers, updateCustomerApi } from '../../api/customerApi';
+import { AxiosError } from 'axios';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -66,21 +68,26 @@ export function Customers(): React.ReactElement {
   const [emailForm] = Form.useForm();
 
   // Fetch all customers
-  const fetchCustomers = async () => {
+  const getCustomers = async (): Promise<void> => {
     setLoading(true);
     try {
-      const response = await userInstance.get('api/customer/list-customers');
-      setAllCustomers(response.data.customers || []);
-    } catch (error) {
-      message.error('Failed to fetch customers');
-      console.error('Error fetching customers:', error);
+      const customers = await fetchCustomers();
+      setAllCustomers(customers);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        message.error(error.response?.data?.message || "Failed to fetch customers");
+      } else if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error("An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    getCustomers();
   }, []);
 
   useEffect(() => {
@@ -108,69 +115,46 @@ export function Customers(): React.ReactElement {
   const addCustomer = async (values: CustomerFormValues) => {
     setLoading(true);
     try {
-      const customerData = {
-        name: values.name,
-        email: values.email,
-        mobileNumber: values.mobileNumber,
-        address: {
-          street: values.street,
-          city: values.city,
-          state: values.state,
-          zipCode: values.zipCode,
-          country: values.country
-        }
-      };
-
-      const response = await userInstance.post('api/customer/add-customer', customerData);
-      if (response.status === 201) {
-        message.success('Customer added successfully');
-      }
-
-      setAllCustomers([...allCustomers, response.data.customer]);
-
+      const newCustomer = await addCustomerApi(values);
+      message.success("Customer added successfully");
+  
+      setAllCustomers([...allCustomers, newCustomer]);
       form.resetFields();
       setModalVisible(false);
-    } catch (error) {
-      message.error('Failed to add customer');
-      console.error('Error adding customer:', error);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        message.error(error.response?.data?.message || "Failed to add customer");
+      } else if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Update customer
-  const updateCustomer = async (values: CustomerFormValues) => {
+const updateCustomer = async (values: CustomerFormValues) => {
     if (!editingCustomer) return;
-
+  
     setLoading(true);
     try {
-      const customerData = {
-        name: values.name,
-        email: values.email,
-        mobileNumber: values.mobileNumber,
-        address: {
-          street: values.street,
-          city: values.city,
-          state: values.state,
-          zipCode: values.zipCode,
-          country: values.country
-        }
-      };
-
-      const response = await userInstance.put(`api/customer/update-customer/${editingCustomer._id}`, customerData);
-      message.success('Customer updated successfully');
-
-      // Update local state with the updated customer
+      const updatedCustomer = await updateCustomerApi(editingCustomer._id, values);
+      message.success("Customer updated successfully");
+  
       setAllCustomers(allCustomers.map(customer =>
-        customer._id === editingCustomer._id ? response.data.customer : customer
+        customer._id === editingCustomer._id ? updatedCustomer : customer
       ));
-
+  
       form.resetFields();
       setModalVisible(false);
       setEditingCustomer(null);
-    } catch (error) {
-      message.error('Failed to update customer');
-      console.error('Error updating customer:', error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -180,32 +164,34 @@ export function Customers(): React.ReactElement {
   const deleteCustomer = async (id: string) => {
     setLoading(true);
     try {
-      await userInstance.delete(`api/customer/delete-customer/${id}`);
-      message.success('Customer deleted successfully');
-
+      await deleteCustomerApi(id);
+      message.success("Customer deleted successfully");
+  
       // Update local state by removing the deleted customer
-      setAllCustomers(allCustomers.filter(customer => customer._id !== id));
-
-      // If deleting the last item on a page, go back to previous page
-      const remainingFilteredItems = allCustomers
-        .filter(customer => customer._id !== id)
-        .filter(customer => {
-          if (!searchText) return true;
-          const lowerCaseSearch = searchText.toLowerCase();
-          return customer.name.toLowerCase().includes(lowerCaseSearch) ||
-            customer.email.toLowerCase().includes(lowerCaseSearch) ||
-            customer.mobileNumber.toLowerCase().includes(lowerCaseSearch) ||
-            customer.address.city.toLowerCase().includes(lowerCaseSearch) ||
-            customer.address.country.toLowerCase().includes(lowerCaseSearch);
-        });
-
+      const updatedCustomers = allCustomers.filter(customer => customer._id !== id);
+      setAllCustomers(updatedCustomers);
+  
+      // Handle pagination if the last item on a page is deleted
+      const remainingFilteredItems = updatedCustomers.filter(customer => {
+        if (!searchText) return true;
+        const lowerCaseSearch = searchText.toLowerCase();
+        return customer.name.toLowerCase().includes(lowerCaseSearch) ||
+          customer.email.toLowerCase().includes(lowerCaseSearch) ||
+          customer.mobileNumber.toLowerCase().includes(lowerCaseSearch) ||
+          customer.address.city.toLowerCase().includes(lowerCaseSearch) ||
+          customer.address.country.toLowerCase().includes(lowerCaseSearch);
+      });
+  
       const totalPages = Math.ceil(remainingFilteredItems.length / pageSize);
       if (currentPage > totalPages && currentPage > 1) {
         setCurrentPage(totalPages || 1);
       }
-    } catch (error) {
-      message.error('Failed to delete customer');
-      console.error('Error deleting customer:', error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }

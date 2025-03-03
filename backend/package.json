@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint --ext .ts src",
+    "start": "node src/server.ts",
     "dev": "nodemon src/server.ts",
     "build": "tsc"
   },

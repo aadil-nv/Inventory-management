@@ -65,8 +65,8 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     console.log(accessToken)
     console.log(refreshToken)
 
-    res.cookie("accessToken", accessToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", maxAge: 15 * 60 * 1000 });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie("accessToken", accessToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "none", maxAge: 15 * 60 * 1000 });
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "none", maxAge: 7 * 24 * 60 * 60 * 1000 });
 
     res.status(HttpStatusCode.OK).json({ message: MESSAGES.USER_LOGGED_IN ,name:user.name });
   } catch (error) {

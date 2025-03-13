@@ -278,7 +278,7 @@ export function Sales() {
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await userInstance.get(`api/sale/delete-sale/${id}`);
+      await userInstance.delete(`api/sale/delete-sale/${id}`);
       toast.success('Sale deleted successfully');
       fetchSales();
     } catch (error) {

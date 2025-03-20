@@ -79,7 +79,7 @@ export const updateCustomer = async (req: AuthRequest, res: Response, next: Next
     }
 
     const { id } = req.params;
-    const { email, mobileNumber } = req.body;
+    const { email} = req.body;
 
     // Check if the new email already exists but exclude the current customer
     if (email) {

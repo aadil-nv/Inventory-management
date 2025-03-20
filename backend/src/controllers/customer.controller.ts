@@ -79,18 +79,25 @@ export const updateCustomer = async (req: AuthRequest, res: Response, next: Next
     }
 
     const { id } = req.params;
+    const { email, mobileNumber } = req.body;
 
-    const {email ,mobileNumber} =req.body
-    const existingCustomer = await Customer.findOne({ email });
-    const existingMobileNumber = await Customer.findOne({ mobileNumber });
-    if (existingCustomer) {
-      return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.CUSTOMER_ALREADY_EXISTS });
+    // Check if the new email already exists but exclude the current customer
+    if (email) {
+      const existingCustomer = await Customer.findOne({ email, _id: { $ne: id } });
+      if (existingCustomer) {
+        return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.CUSTOMER_ALREADY_EXISTS });
+      }
     }
-    if (existingMobileNumber) {
-      return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.MOBILE_NUMBER_ALREADY_EXISTS });
+
+    // Check if the new mobile number already exists but exclude the current customer
+    if (mobileNumber) {
+      const existingMobileNumber = await Customer.findOne({ mobileNumber, _id: { $ne: id } });
+      if (existingMobileNumber) {
+        return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.MOBILE_NUMBER_ALREADY_EXISTS });
+      }
     }
-  
-    
+
+    // Update the customer
     const updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, { new: true });
 
     if (!updatedCustomer) {
@@ -105,6 +112,7 @@ export const updateCustomer = async (req: AuthRequest, res: Response, next: Next
     next(error);
   }
 };
+
 
 export const deleteCustomer = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

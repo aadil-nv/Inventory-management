@@ -90,12 +90,12 @@ export const updateCustomer = async (req: AuthRequest, res: Response, next: Next
     }
 
     // Check if the new mobile number already exists but exclude the current customer
-    if (mobileNumber) {
-      const existingMobileNumber = await Customer.findOne({ mobileNumber, _id: { $ne: id } });
-      if (existingMobileNumber) {
-        return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.MOBILE_NUMBER_ALREADY_EXISTS });
-      }
-    }
+    // if (mobileNumber) {
+    //   const existingMobileNumber = await Customer.findOne({ mobileNumber, _id: { $ne: id } });
+    //   if (existingMobileNumber) {
+    //     return res.status(HttpStatusCode.CONFLICT).json({ message: MESSAGES.MOBILE_NUMBER_ALREADY_EXISTS });
+    //   }
+    // }
 
     // Update the customer
     const updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, { new: true });
